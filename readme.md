@@ -1,4 +1,4 @@
-# Système de Gestion de Rendez-vous Médicaux - Clinique VitaCare
+# Système de Gestion de Rendez-vous Médicaux - Sunu Clinique
 
 ## 📖 À Propos du Projet
 
