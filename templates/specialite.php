@@ -67,7 +67,11 @@ if (!$specialty_details) {
 // --- AMÉLIORATION 3 : Gestion d'erreur plus robuste ---
 $medecins_specialistes = [];
 try {
-    $stmt = $pdo->prepare("SELECT nom, prenom FROM personnel WHERE specialite = ? AND role = 'medecin'");
+    $stmt = $pdo->prepare("
+        SELECT p.nom, p.prenom 
+        FROM personnel p
+        JOIN specialites s ON p.id_specialite_fk = s.id_specialite
+        WHERE s.nom_specialite = ? AND p.role = 'medecin'");
     $stmt->execute([$nom_specialite]);
     $medecins_specialistes = $stmt->fetchAll();
 } catch (PDOException $e) {

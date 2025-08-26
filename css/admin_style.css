@@ -1,0 +1,51 @@
+/* Fichier : /css/admin_style.css */
+:root { 
+    --primary-blue: #154784;    
+    --light-bg: #f5f7fa;       
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 88px; /* Nouvelle variable pour la largeur pliée */
+    --font-family: 'Poppins', sans-serif;
+}
+body { 
+    background-color: var(--light-bg); 
+    font-family: var(--font-family); 
+}
+.wrapper { display: flex; align-items: stretch; }
+#sidebar { 
+    min-width: var(--sidebar-width); max-width: var(--sidebar-width);
+    background: #212529; color: white; transition: all 0.3s;
+    position: relative; /* Important pour le bouton de bascule */
+}
+#sidebar.collapsed { 
+    min-width: var(--sidebar-collapsed-width); 
+    max-width: var(--sidebar-collapsed-width); 
+}
+#sidebar .sidebar-header { padding: 20px; background: #343a40; text-align: center; }
+#sidebar.collapsed .sidebar-header h3 { font-size: 1.5rem; }
+#sidebar.collapsed .sidebar-header h3 .me-2 { margin-right: 0 !important; }
+#sidebar.collapsed .sidebar-header h3 span { display: none; }
+
+#sidebar .nav-link { 
+    color: rgba(255, 255, 255, 0.8); padding: 10px 15px; border-radius: 8px; 
+    font-weight: 500; display: flex; align-items: center;
+}
+#sidebar.collapsed .nav-link { justify-content: center; }
+#sidebar.collapsed .nav-link .link-text { display: none; }
+#sidebar .nav-link .bi { font-size: 1.2rem; margin-right: 1rem; }
+#sidebar.collapsed .nav-link .bi { margin-right: 0; }
+#sidebar .nav-link:hover { background-color: #495057; color: white; }
+#sidebar .nav-link.active { background-color: var(--primary-blue); color: white; font-weight: 600; }
+
+/* Style du bouton de bascule */
+#sidebar-toggle { 
+    position: absolute; top: 20px; right: -15px; 
+    background-color: white; border: 1px solid #ddd; border-radius: 50%; 
+    width: 30px; height: 30px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer; z-index: 1000;
+}
+.main-content { width: 100%; padding: 2.5rem; transition: all 0.3s; }
+
+/* Styles des cartes (inchangés) */
+.stat-card { background-color: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05); border: none; }
+.stat-card .icon-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+.chart-card { background-color: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05); border: none; }

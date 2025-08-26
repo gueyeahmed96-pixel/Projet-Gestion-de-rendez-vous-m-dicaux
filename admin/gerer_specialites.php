@@ -1,215 +1,92 @@
 <?php
-/* **************************************
- * INITIALISATION ET CONTRÔLE D'ACCÈS
- * **************************************/
-
-// Démarrage de la session pour accéder aux variables $_SESSION
 session_start();
-
-// Inclusion du fichier de connexion à la base de données
 require_once '../includes/db_connect.php';
-
-/**
- * VÉRIFICATION DES DROITS ADMIN
- * - Vérifie que l'utilisateur est connecté (session active)
- * - Vérifie que son rôle est bien 'admin'
- * Si non, redirection vers la page d'accueil
- */
+require_once '../includes/tracker.php';
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../index.php'); 
+    header('Location: ../index.php?message=' . urlencode('Accès non autorisé.'));
     exit();
 }
 
-/* **************************************
- * RÉCUPÉRATION DES DONNÉES
- * **************************************/
-
+$specialites = [];
 try {
-    // Requête pour obtenir toutes les spécialités triées par ordre alphabétique
-    $stmt = $pdo->query("SELECT * FROM specialites ORDER BY nom_specialite ASC");
-    $specialites = $stmt->fetchAll();
+    // On sélectionne et on trie par la colonne 'nom_specialite'
+    $stmt = $pdo->query("SELECT id_specialite, nom_specialite FROM specialites ORDER BY nom_specialite ASC");
+    $specialites = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { 
-    die("Erreur: " . $e->getMessage()); // Arrêt en cas d'erreur SQL
+    die("Erreur lors de la récupération des spécialités : " . $e->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <!-- Configuration de base -->
     <meta charset="UTF-8">
-    <title>Gérer les Spécialités - Admin</title>
-    
-    <!-- Inclusion des CSS -->
+    <title>Gérer les Spécialités - Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Styles personnalisés -->
+    <link rel="stylesheet" href="../css/admin_style.css">
     <style>
+        /* Le CSS a été simplifié, mettez-le à jour */
         :root { 
-            --primary-blue: #154784;    /* Couleur principale */
-            --light-gray-bg: #F7F9FC;   /* Fond clair */
-            --sidebar-width: 280px;     /* Largeur sidebar */
+            --primary-blue: #154784; --secondary-green: #25A795; --light-bg: #f5f7fa; 
+            --font-family: 'Poppins', sans-serif;
         }
-        
-        body { 
-            background-color: var(--light-gray-bg); 
-            font-family: 'Poppins', sans-serif; 
-        }
-        
-        /* Structure de la sidebar */
-        #sidebar { 
-            min-width: var(--sidebar-width); 
-            background: #212529; 
-            color: white; 
-        }
-        
-        /* Style des liens actifs */
-        #sidebar .nav-link.active { 
-            background-color: var(--primary-blue); 
-            color: white; 
-        }
+        body { background-color: var(--light-bg); font-family: var(--font-family); }
+        /* Style pour les liens actifs dans la sidebar Offcanvas */
+        .offcanvas .nav-link.active { background-color: var(--primary-blue); }
+        .main-content { padding: 2.5rem; }
+        /* ... (vos autres styles comme .stat-card, .chart-card peuvent rester) ... */
     </style>
 </head>
-
 <body>
-<!-- **************************************
-     STRUCTURE PRINCIPALE
-     ************************************** -->
-<div class="wrapper">
-    <!-- ==============================
-         SIDEBAR DE NAVIGATION 
-         ============================== -->
-    <nav id="sidebar" class="d-flex flex-column p-3">
-        <div class="sidebar-header">
-            <h3>Administration</h3>
-        </div>
-        
-        <!-- Menu de navigation -->
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item mb-2">
-                <a href="dashboard.php" class="nav-link">
-                    <i class="bi bi-grid-1x2-fill me-2"></i>Tableau de bord
-                </a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="gerer_personnel.php" class="nav-link">
-                    <i class="bi bi-people-fill me-2"></i>Gérer le Personnel
-                </a>
-            </li>
-            <li class="nav-item mb-2">
-                <a href="gerer_specialites.php" class="nav-link active">
-                    <i class="bi bi-card-checklist me-2"></i>Gérer Spécialités
-                </a>
-            </li>
-        </ul>
-        
-        <!-- Bouton de déconnexion -->
-        <div class="mt-auto p-3 text-center">
-            <a href="../actions/deconnexion.php" class="btn btn-outline-light w-100">
-                Se déconnecter
-            </a>
-        </div>
-    </nav>
+    <?php 
+    // 1. On inclut la sidebar Offcanvas (elle est cachée par défaut)
+    include 'includes/sidebar.php'; 
+    
+    // 2. On inclut la barre de navigation du haut (visible)
+    include 'includes/topbar.php'; 
+    ?>
 
-    <!-- ==============================
-         CONTENU PRINCIPAL
-         ============================== -->
     <div class="main-content">
-        <!-- En-tête de page -->
-        <h1>Gérer les Spécialités</h1>
-        <p class="text-muted">
-            Ajoutez, modifiez ou supprimez les spécialités proposées par la clinique.
-        </p>
-        
-        <!-- Affichage des messages de feedback -->
-        <?php if(isset($_GET['message_succes'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_GET['message_succes']) ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if(isset($_GET['message_erreur'])): ?>
-            <div class="alert alert-danger">
-                <?= htmlspecialchars($_GET['message_erreur']) ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Grille à 2 colonnes -->
-        <div class="row">
-            <!-- Colonne principale : Liste des spécialités -->
-            <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nom de la spécialité</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Boucle sur chaque spécialité -->
-                                <?php foreach ($specialites as $spe): ?>
-                                <tr>
-                                    <!-- Nom de la spécialité -->
-                                    <td><?= htmlspecialchars($spe['nom_specialite']) ?></td>
-                                    
-                                    <!-- Actions -->
-                                    <td>
-                                        <!-- Formulaire de modification -->
-                                        <form action="actions_specialites.php" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="modifier">
-                                            <input type="hidden" name="id_specialite" value="<?= $spe['id_specialite'] ?>">
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" 
-                                                       name="nom_specialite" 
-                                                       value="<?= htmlspecialchars($spe['nom_specialite']) ?>" 
-                                                       required>
-                                                <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-save-fill"></i>
-                                                </button>
-                                            </div>
-                                        </form>
-                                        
-                                        <!-- Bouton de suppression -->
-                                        <a href="actions_specialites.php?action=supprimer&id=<?= $spe['id_specialite'] ?>" 
-                                           class="btn btn-danger btn-sm" 
-                                           onclick="return confirm('Attention ! Supprimer cette spécialité la retirera de tous les médecins associés. Êtes-vous sûr ?');">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Colonne secondaire : Formulaire d'ajout -->
-            <div class="col-md-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header">
-                        Ajouter une nouvelle spécialité
-                    </div>
-                    <div class="card-body">
-                        <form action="actions_specialites.php" method="POST">
-                            <input type="hidden" name="action" value="ajouter">
-                            <div class="mb-3">
-                                <label class="form-label">Nom de la spécialité</label>
-                                <input type="text" name="nom_specialite" class="form-control" required>
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">
-                                Ajouter
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 style="color: var(--primary-blue);">Gérer les Spécialités</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterSpecialiteModal"><i class="bi bi-plus-circle me-2"></i>Ajouter une spécialité</button>
         </div>
+        <?php if(isset($_GET['message_succes'])): ?><div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($_GET['message_succes']) ?></div><?php endif; ?>
+        <?php if(isset($_GET['message_erreur'])): ?><div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($_GET['message_erreur']) ?></div><?php endif; ?>
+        <div class="card shadow-sm border-0"><div class="card-body"><div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-light"><tr><th>ID</th><th>Nom</th><th class="text-end">Actions</th></tr></thead><tbody>
+        <?php foreach ($specialites as $spe): ?>
+        <tr>
+            <td><span class="badge bg-secondary">#<?= $spe['id_specialite'] ?></span></td>
+            <td><strong><?= htmlspecialchars($spe['nom_specialite']) ?></strong></td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modifierSpecialiteModal<?= $spe['id_specialite'] ?>"><i class="bi bi-pencil-fill"></i></button>
+                <a href="actions/actions_specialites.php?action=supprimer&id=<?= $spe['id_specialite'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Attention ! Supprimer cette spécialité la retirera de tous les médecins associés. Êtes-vous sûr ?');"><i class="bi bi-trash-fill"></i></a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        </tbody></table></div></div></div>
     </div>
-</div>
+
+<!-- Modale d'Ajout -->
+<div class="modal fade" id="ajouterSpecialiteModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Ajouter une Spécialité</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <form action="actions/actions_specialites.php" method="POST"><div class="modal-body">
+        <input type="hidden" name="action" value="ajouter">
+        <div class="mb-3"><label for="nom" class="form-label">Nom de la spécialité</label><input type="text" id="nom" name="nom_specialite" class="form-control" required></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="submit" class="btn btn-primary">Ajouter</button></div></form>
+</div></div></div>
+
+<!-- Modales de Modification -->
+<?php foreach ($specialites as $spe): ?>
+<div class="modal fade" id="modifierSpecialiteModal<?= $spe['id_specialite'] ?>" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Modifier "<?= htmlspecialchars($spe['nom_specialite']) ?>"</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <form action="actions/actions_specialites.php" method="POST"><div class="modal-body">
+        <input type="hidden" name="action" value="modifier"><input type="hidden" name="id_specialite" value="<?= $spe['id_specialite'] ?>">
+        <div class="mb-3"><label for="nom_<?= $spe['id_specialite'] ?>" class="form-label">Nouveau nom</label><input type="text" id="nom_<?= $spe['id_specialite'] ?>" class="form-control" name="nom" value="<?= htmlspecialchars($spe['nom_specialite']) ?>" required></div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer</button></div></form>
+</div></div></div>
+<?php endforeach; ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

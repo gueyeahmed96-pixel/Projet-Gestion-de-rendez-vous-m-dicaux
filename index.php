@@ -6,8 +6,8 @@ require_once 'includes/db_connect.php';
 // 2. LOGIQUE PHP NÉCESSAIRE POUR LES VUES PARTIELLES
 // Cette logique doit rester dans le fichier principal pour être accessible par les 'include'
 try {
-    $stmt = $pdo->query("SELECT DISTINCT specialite FROM personnel WHERE role = 'medecin' ORDER BY specialite");
-    $specialites = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $stmt = $pdo->query("SELECT  nom_specialite FROM specialites ORDER BY nom_specialite");
+    $specialites = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 } catch (PDOException $e) { 
     $specialites = []; 
 }
