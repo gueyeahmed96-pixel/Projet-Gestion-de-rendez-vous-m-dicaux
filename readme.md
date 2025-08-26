@@ -4,10 +4,10 @@
 
 Ce projet est une application web complète de prise de rendez-vous en ligne conçue pour un centre de santé. Il permet aux patients de s'inscrire, de prendre rendez-vous avec des spécialistes, et de gérer leurs consultations. Il offre également un espace personnel sécurisé pour le personnel médical afin de consulter et gérer leur planning quotidien.
 
-Ce projet a été développé dans le cadre du cours [Nom du cours ou de l'UE] pour l'année de Licence 2.
+Ce projet a été développé dans le cadre du cours [Développement Web Avancé] pour l'année de Licence 2 en Management Informatisé des Organisations à L'Université Iba Der Thiam de Thiès.
 
-**Auteur :** [Votre Nom Complet]
-**Encadrant :** [Nom de votre professeur, si applicable]
+**Auteur :** [Mamadou Lamine Gueye, Mor Diop, Fatou Ndiaye]
+**Encadrant :** [Docteur Dia]
 **Date :** Août 2024
 
 ---
@@ -77,14 +77,14 @@ Pour lancer ce projet en local, veuillez suivre les étapes suivantes.
 
     ```php
     define('DB_HOST', 'localhost');
-    define('DB_NAME', 'centre_sante_db');
+    define('DB_NAME', 'gestion_de_rendez_vous_médicaux');
     define('DB_USER', 'root');
     define('DB_PASS', '');
     ```
 
 5.  **Lancer l'Application :**
     Ouvrez votre navigateur et accédez à l'URL correspondant au dossier de votre projet. Par exemple :
-    `http://localhost/Projet_Gestion_rdv_m%C3%A9dicaux/`
+    `http://localhost/Projet_Gestion_rdv_médicaux/`
 
 ---
 
