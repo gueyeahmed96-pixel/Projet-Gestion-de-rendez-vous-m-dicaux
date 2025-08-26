@@ -8,7 +8,7 @@ Ce projet a été développé dans le cadre du cours [Développement Web Avancé
 
 **Auteur :** [Mamadou Lamine Gueye, Mor Diop, Fatou Ndiaye]
 **Encadrant :** [Docteur Dia]
-**Date :** Août 2024
+**Date :** Août 2024-2025
 
 ---
 
